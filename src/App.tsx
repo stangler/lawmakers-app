@@ -1,35 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { JapanMap } from './components/JapanMap';
+import { MemberPanel } from './components/MemberPanel';
+import { Header } from './components/Header';
+import { useSingleSeatMembers, useProportionalMembers } from './hooks/useMembers';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [mode, setMode] = useState<'single-seat' | 'proportional'>('single-seat');
+  const [selectedPrefecture, setSelectedPrefecture] = useState<string | null>(null);
+  const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
+
+  const { members, isLoading: loadingSingle, error: errorSingle } = useSingleSeatMembers();
+  const { members: proportionalMembers, isLoading: loadingProp, error: errorProp } = useProportionalMembers();
+
+  const isLoading = loadingSingle || loadingProp;
+  const error = errorSingle || errorProp;
+  const totalCount = members.length + proportionalMembers.length;
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-900">
+        <div className="text-cyan-400 text-xl">読み込み中...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-900">
+        <div className="text-red-400 text-xl">エラー: {error.message}</div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="h-screen w-screen flex flex-col bg-slate-900">
+      <Header
+        mode={mode}
+        onModeChange={(newMode) => {
+          setMode(newMode);
+          setSelectedPrefecture(null);
+          setSelectedBlock(null);
+        }}
+        totalCount={totalCount}
+      />
+      
+      <div className="flex flex-1 min-h-0">
+        {/* Map area */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <JapanMap
+            members={members}
+            proportionalMembers={proportionalMembers}
+            selectedPrefecture={selectedPrefecture}
+            onSelectPrefecture={setSelectedPrefecture}
+            selectedBlock={selectedBlock}
+            onSelectBlock={setSelectedBlock}
+            mode={mode}
+          />
+        </div>
+
+        {/* Side panel */}
+        <MemberPanel
+          selectedPrefecture={selectedPrefecture}
+          selectedBlock={selectedBlock}
+          members={members}
+          proportionalMembers={proportionalMembers}
+          mode={mode}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
