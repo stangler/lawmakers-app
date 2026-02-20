@@ -16,6 +16,25 @@ function App() {
   const error = errorSingle || errorProp;
   const totalCount = members.length + proportionalMembers.length;
 
+  // Debug: パースされた比例代表データのブロック名を確認
+  console.log('=== Proportional Members Debug ===');
+  console.log('Total proportional members:', proportionalMembers.length);
+  const blocks = [...new Set(proportionalMembers.map(m => m.block))];
+  console.log('Blocks found:', blocks);
+  console.log('Members per block:');
+  blocks.forEach(block => {
+    console.log(`  ${block}: ${proportionalMembers.filter(m => m.block === block).length} members`);
+  });
+  
+  // Debug: BLOCK_PREFECTURES と実際のブロックの比較
+  console.log('=== Block Mapping Debug ===');
+  const BLOCK_PREFECTURES_KEYS = [
+    '北海道ブロック', '東北ブロック', '北関東ブロック', '南関東ブロック', '東京ブロック',
+    '北陸信越ブロック', '東海ブロック', '近畿ブロック', '中国ブロック', '四国ブロック', '九州ブロック'
+  ];
+  console.log('Expected blocks:', BLOCK_PREFECTURES_KEYS);
+  console.log('Actual blocks:', blocks);
+
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-slate-900">
