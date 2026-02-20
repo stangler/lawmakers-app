@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { JapanMap } from './components/JapanMap';
 import { MemberPanel } from './components/MemberPanel';
+import { NewsPanel } from './components/NewsPanel';
 import { Header } from './components/Header';
 import { useSingleSeatMembers, useProportionalMembers } from './hooks/useMembers';
+import { useNewsData } from './hooks/useNewsData';
 
 function App() {
   const [mode, setMode] = useState<'single-seat' | 'proportional'>('single-seat');
@@ -12,28 +14,20 @@ function App() {
   const { members, isLoading: loadingSingle, error: errorSingle } = useSingleSeatMembers();
   const { members: proportionalMembers, isLoading: loadingProp, error: errorProp } = useProportionalMembers();
 
+  // News data
+  const {
+    filteredNews,
+    isLoading: loadingNews,
+    error: errorNews,
+    lastUpdated,
+    refresh,
+    filterByCategory,
+    selectedCategory,
+  } = useNewsData();
+
   const isLoading = loadingSingle || loadingProp;
   const error = errorSingle || errorProp;
   const totalCount = members.length + proportionalMembers.length;
-
-  // Debug: パースされた比例代表データのブロック名を確認
-  console.log('=== Proportional Members Debug ===');
-  console.log('Total proportional members:', proportionalMembers.length);
-  const blocks = [...new Set(proportionalMembers.map(m => m.block))];
-  console.log('Blocks found:', blocks);
-  console.log('Members per block:');
-  blocks.forEach(block => {
-    console.log(`  ${block}: ${proportionalMembers.filter(m => m.block === block).length} members`);
-  });
-  
-  // Debug: BLOCK_PREFECTURES と実際のブロックの比較
-  console.log('=== Block Mapping Debug ===');
-  const BLOCK_PREFECTURES_KEYS = [
-    '北海道ブロック', '東北ブロック', '北関東ブロック', '南関東ブロック', '東京ブロック',
-    '北陸信越ブロック', '東海ブロック', '近畿ブロック', '中国ブロック', '四国ブロック', '九州ブロック'
-  ];
-  console.log('Expected blocks:', BLOCK_PREFECTURES_KEYS);
-  console.log('Actual blocks:', blocks);
 
   if (isLoading) {
     return (
@@ -77,13 +71,25 @@ function App() {
           />
         </div>
 
-        {/* Side panel */}
+        {/* Member panel */}
         <MemberPanel
           selectedPrefecture={selectedPrefecture}
           selectedBlock={selectedBlock}
           members={members}
           proportionalMembers={proportionalMembers}
           mode={mode}
+          news={filteredNews}
+        />
+
+        {/* News panel */}
+        <NewsPanel
+          news={filteredNews}
+          isLoading={loadingNews}
+          error={errorNews}
+          lastUpdated={lastUpdated}
+          selectedCategory={selectedCategory}
+          onCategoryChange={filterByCategory}
+          onRefresh={refresh}
         />
       </div>
     </div>
