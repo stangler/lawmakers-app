@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { SingleSeatMember, ProportionalMember } from '../types/member';
-import { PREFECTURE_MAP } from '../lib/prefectures';
+import { PREFECTURE_MAP, type Prefecture } from '../lib/prefectures';
 import { PARTY_COLORS } from '../lib/parseMembers';
 import { ZoomControls } from './ZoomControls';
 import { useMapZoom } from '../hooks/useMapZoom';
@@ -32,9 +32,9 @@ const BLOCK_PREFECTURES: Record<string, string[]> = {
   '北海道ブロック': ['01'],
   '東北ブロック': ['02', '03', '04', '05', '06', '07'],
   '北関東ブロック': ['08', '09', '10', '11'],
-  '南関東ブロック': ['12', '13', '14'],
-  '東京ブロック': ['13'],
-  '北陸信越ブロック': ['15', '16', '17', '18', '19', '20'],
+  '南関東ブロック': ['12', '14', '19'],  // 千葉、神奈川、山梨
+  '東京ブロック': ['13'], // 東京
+  '北陸信越ブロック': ['15', '16', '17', '18', '20'],  // 新潟、富山、石川、福井、長野
   '東海ブロック': ['21', '22', '23', '24'],
   '近畿ブロック': ['25', '26', '27', '28', '29', '30'],
   '中国ブロック': ['31', '32', '33', '34', '35'],
@@ -122,6 +122,22 @@ export function JapanMap({
     
     return Object.entries(partyCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
   }, [membersByBlock]);
+
+  // Get block center coordinates
+  const getBlockCenter = useCallback((blockPrefectures: string[]) => {
+    const centers = blockPrefectures
+      .map(code => PREFECTURE_MAP.get(code))
+      .filter((pref): pref is Prefecture => pref !== undefined)
+      .map(pref => projection([pref.lng, pref.lat]))
+      .filter((coords): coords is [number, number] => coords !== null);
+    
+    if (centers.length === 0) return null;
+    
+    const avgX = centers.reduce((sum, [x]) => sum + x, 0) / centers.length;
+    const avgY = centers.reduce((sum, [, y]) => sum + y, 0) / centers.length;
+    
+    return [avgX, avgY] as [number, number];
+  }, [projection]);
 
   // Handle prefecture click
   const handleClick = useCallback(
@@ -275,13 +291,13 @@ export function JapanMap({
     // Member count labels
     const labelsGroup = g.append('g').attr('class', 'labels');
     
-    for (const [code, prefMembers] of membersByPrefecture) {
-      const pref = PREFECTURE_MAP.get(code);
-      if (!pref) continue;
-      
-      const [x, y] = projection([pref.lng, pref.lat]) ?? [0, 0];
-      
-      if (mode === 'single-seat') {
+    if (mode === 'single-seat') {
+      for (const [code, prefMembers] of membersByPrefecture) {
+        const pref = PREFECTURE_MAP.get(code);
+        if (!pref) continue;
+        
+        const [x, y] = projection([pref.lng, pref.lat]) ?? [0, 0];
+        
         labelsGroup
           .append('text')
           .attr('x', x)
@@ -294,6 +310,29 @@ export function JapanMap({
           .attr('pointer-events', 'none')
           .attr('opacity', 0.8)
           .text(prefMembers.length);
+      }
+    } else if (mode === 'proportional') {
+      for (const [block, blockMembers] of membersByBlock) {
+        const blockPrefectures = BLOCK_PREFECTURES[block];
+        if (!blockPrefectures) continue;
+
+        const center = getBlockCenter(blockPrefectures);
+        if (!center) continue;
+        
+        const [x, y] = center;
+        
+        labelsGroup
+          .append('text')
+          .attr('x', x)
+          .attr('y', y)
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
+          .attr('fill', '#fff')
+          .attr('font-size', 14)
+          .attr('font-family', 'JetBrains Mono, monospace')
+          .attr('pointer-events', 'none')
+          .attr('opacity', 0.9)
+          .text(blockMembers.length);
       }
     }
   }, [topology, membersByPrefecture, selectedPrefecture, selectedBlock, mode, handleClick, projection, pathGenerator, getDominantParty, getDominantPartyForBlock, onSelectBlock, resetZoom, zoomToPoint]);
