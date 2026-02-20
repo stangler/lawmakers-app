@@ -142,7 +142,10 @@ vite.config.ts.timestamp-*
 .devcontainer
 
 # Reference
-reference
+/reference
+
+# Data
+/data
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
