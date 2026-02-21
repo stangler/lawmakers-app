@@ -340,7 +340,7 @@ export function JapanMap({
           .text(blockMembers.length);
       }
     }
-  }, [topology, membersByPrefecture, selectedPrefecture, selectedBlock, mode, handleClick, projection, pathGenerator, getDominantParty, getDominantPartyForBlock, onSelectBlock, resetZoom, zoomToPoint]);
+  }, [topology, membersByPrefecture, membersByBlock, getBlockCenter, selectedPrefecture, selectedBlock, mode, handleClick, projection, pathGenerator, getDominantParty, getDominantPartyForBlock, onSelectBlock, resetZoom, zoomToPoint]);
 
   // Toggle news visibility
   const toggleNewsVisibility = useCallback(() => {

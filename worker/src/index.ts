@@ -35,7 +35,7 @@ async function getNews(forceRefresh = false): Promise<NewsItem[]> {
 }
 
 export default {
-  async fetch(request, env, ctx): Promise<Response> {
+  async fetch(request, _env, _ctx): Promise<Response> {
     const url = new URL(request.url);
     const pathname = url.pathname;
     

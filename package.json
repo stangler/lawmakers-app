@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint --debug --cache --cache-location node_modules/.cache/eslint/ --cache-strategy content .",
+    "lint:timing": "TIMING=1 eslint --debug",
     "preview": "vite preview"
   },
   "dependencies": {
