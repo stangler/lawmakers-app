@@ -68,6 +68,7 @@ function App() {
             selectedBlock={selectedBlock}
             onSelectBlock={setSelectedBlock}
             mode={mode}
+            news={filteredNews}
           />
         </div>
 

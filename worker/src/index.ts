@@ -3,7 +3,7 @@
  * Provides API for fetching House of Representatives related news from NHK RSS
  */
 
-import { fetchAllNews, getHouseNews, filterByCategory, filterByMember } from './rss-fetcher';
+import { fetchAllNews, getHouseNews, filterByCategory, filterByMember, fetchOgImage } from './rss-fetcher';
 import type { NewsItem, NewsApiResponse } from './types';
 
 // In-memory cache for news
@@ -113,6 +113,33 @@ export default {
       return new Response(JSON.stringify({
         status: 'refreshed',
         lastFetched: lastFetched?.toISOString() ?? null,
+      }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Route: /api/ogp - Fetch OGP image for a URL
+    if (pathname === '/api/ogp' || pathname === '/api/ogp/') {
+      const targetUrl = url.searchParams.get('url');
+      
+      if (!targetUrl) {
+        return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const ogImageUrl = await fetchOgImage(targetUrl);
+      
+      return new Response(JSON.stringify({ 
+        url: ogImageUrl 
       }), {
         status: 200,
         headers: {
