@@ -49,7 +49,7 @@ export function parseSingleSeatMarkdown(markdown: string): SingleSeatMember[] {
       const nextLine = lines[i + 1].trim();
       // 氏名パターン：全角スペースを含む または 漢字のみ
       if (nextLine && !nextLine.startsWith('###') && !nextLine.startsWith('##') && 
-          (nextLine.includes('　') || includes(' ') || /^[\u4E00-\u9FAF]+$/.test(nextLine))) {
+          (nextLine.includes('　') || nextLine.includes(' ') || /^[\u4E00-\u9FAF]+$/.test(nextLine))) {
         const party = line;
         const name = nextLine.replace(/ /g, ' ').trim();
         const kana = lines[i + 2]?.trim() || '';
