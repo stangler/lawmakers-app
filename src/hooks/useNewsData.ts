@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsItem, NewsApiResponse } from '../types/news';
 
 // Worker API URL - configurable via environment variable
-const API_URL = import.meta.env.VITE_WORKER_URL || 'http://localhost:8787';
+// In production, use relative path (same origin), in dev use localhost
+const API_URL = import.meta.env.VITE_WORKER_URL || '';
 const POLL_INTERVAL = 60_000; // 1 minute
 const MAX_RETRIES = 3;
 
