@@ -34,7 +34,8 @@ const PREFECTURE_NAMES: Record<string, string> = {
 };
 
 // API URL for OGP fetching
-const API_URL = import.meta.env.VITE_WORKER_URL || 'http://localhost:8787';
+// In production, use relative path (same origin), in dev use empty string (same origin)
+const API_URL = import.meta.env.VITE_WORKER_URL || '';
 
 export function MapNewsCard({ item, isSelected }: MapNewsCardProps) {
   const [ogImageUrl, setOgImageUrl] = useState<string | null>(item.ogImageUrl || null);
