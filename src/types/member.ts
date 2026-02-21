@@ -1,5 +1,6 @@
 // 小選挙区議員
 export interface SingleSeatMember {
+  id: number;
   prefecture: string;    // 北海道
   prefectureCode: string; // 01
   district: string;      // 1区
@@ -15,6 +16,7 @@ export interface SingleSeatMember {
 
 // 比例代表議員
 export interface ProportionalMember {
+  id: number;
   block: string;         // 北海道ブロック
   party: string;         // 自民
   name: string;
