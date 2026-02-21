@@ -7,6 +7,8 @@ export interface NewsItem {
   publishedAt: string;
   category: 'election' | 'diet' | 'member' | 'politics' | 'other';
   memberNames: string[];
+  prefectureCodes?: string[];
+  ogImageUrl?: string;
 }
 
 // API response type

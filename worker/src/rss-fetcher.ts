@@ -51,6 +51,20 @@ function detectMemberNames(title: string): string[] {
   return found;
 }
 
+// Detect prefecture codes from title
+function detectPrefecture(title: string): string[] {
+  const found: string[] = [];
+  for (const [code, keywords] of Object.entries(PREFECTURE_KEYWORDS)) {
+    for (const keyword of keywords) {
+      if (title.includes(keyword)) {
+        found.push(code);
+        break;
+      }
+    }
+  }
+  return found;
+}
+
 interface RssItem {
   title?: string | { __cdata?: string };
   link?: string;
@@ -101,6 +115,7 @@ async function fetchRssFeed(url: string): Promise<NewsItem[]> {
         publishedAt: new Date(publishedAt).toISOString(),
         category: classifyCategory(title),
         memberNames: detectMemberNames(title),
+        prefectureCodes: detectPrefecture(title),
       };
     }).filter(item => item.title && item.link);
   } catch (error) {
@@ -163,4 +178,49 @@ export function getHouseNews(news: NewsItem[]): NewsItem[] {
   return news.filter(item => 
     ['election', 'diet', 'politics', 'member'].includes(item.category)
   );
+}
+
+// OGP image fetcher - extracts og:image from HTML
+export async function fetchOgImage(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'lawmakers-app/1.0',
+        'Accept': 'text/html',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const html = await response.text();
+
+    // Try to find og:image meta tag
+    const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+
+    if (ogImageMatch && ogImageMatch[1]) {
+      return ogImageMatch[1];
+    }
+
+    // Fallback: try twitter:image
+    const twitterImageMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+
+    if (twitterImageMatch && twitterImageMatch[1]) {
+      return twitterImageMatch[1];
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error fetching OGP from ${url}:`, error);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }

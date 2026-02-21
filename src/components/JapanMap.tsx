@@ -3,9 +3,11 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { SingleSeatMember, ProportionalMember } from '../types/member';
+import type { NewsItem } from '../types/news';
 import { PREFECTURE_MAP, type Prefecture } from '../lib/prefectures';
 import { PARTY_COLORS } from '../lib/parseMembers';
 import { ZoomControls } from './ZoomControls';
+import { MapNewsCard } from './MapNewsCard';
 import { useMapZoom } from '../hooks/useMapZoom';
 
 interface JapanMapProps {
@@ -16,6 +18,7 @@ interface JapanMapProps {
   selectedBlock: string | null;
   onSelectBlock: (block: string | null) => void;
   mode: 'single-seat' | 'proportional';
+  news?: NewsItem[];
 }
 
 interface PrefectureProperties {
@@ -57,6 +60,7 @@ export function JapanMap({
   selectedBlock,
   onSelectBlock,
   mode,
+  news = [],
 }: JapanMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const mapGroupRef = useRef<SVGGElement>(null);
@@ -337,10 +341,74 @@ export function JapanMap({
     }
   }, [topology, membersByPrefecture, selectedPrefecture, selectedBlock, mode, handleClick, projection, pathGenerator, getDominantParty, getDominantPartyForBlock, onSelectBlock, resetZoom, zoomToPoint]);
 
+  // Group news by prefecture
+  const newsByPrefecture = useMemo(() => {
+    const map = new Map<string, NewsItem[]>();
+    for (const item of news) {
+      const codes = item.prefectureCodes || [];
+      if (codes.length === 0) {
+        // News without prefecture - show on Tokyo (13) by default
+        const defaultCode = '13';
+        const existing = map.get(defaultCode) || [];
+        map.set(defaultCode, [...existing, item]);
+      } else {
+        for (const code of codes) {
+          const existing = map.get(code) || [];
+          map.set(code, [...existing, item]);
+        }
+      }
+    }
+    return map;
+  }, [news]);
+
+  // Convert map coordinates to screen coordinates
+  const getScreenCoords = useCallback((prefCode: string): { x: number; y: number } | null => {
+    const pref = PREFECTURE_MAP.get(prefCode);
+    if (!pref) return null;
+    const coords = projection([pref.lng, pref.lat]);
+    if (!coords) return null;
+    
+    // Apply zoom transform
+    const x = zoomState.x + coords[0] * zoomState.k;
+    const y = zoomState.y + coords[1] * zoomState.k;
+    return { x, y };
+  }, [projection, zoomState]);
+
   const transformStr = `translate(${zoomState.x}, ${zoomState.y}) scale(${zoomState.k})`;
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* News cards overlay */}
+      {news.length > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ overflow: 'hidden' }}
+        >
+          {Array.from(newsByPrefecture.entries()).map(([prefCode, prefNews]) => {
+            const coords = getScreenCoords(prefCode);
+            if (!coords) return null;
+            
+            // Limit to latest 2 news per prefecture
+            const displayNews = prefNews.slice(0, 2);
+            
+            return displayNews.map((item, index) => (
+              <div
+                key={item.id}
+                className="pointer-events-auto absolute"
+                style={{
+                  left: coords.x - 128, // Half of card width (w-64 = 256px)
+                  top: coords.y - 100 + index * 180, // Offset for multiple cards
+                  transform: 'scale(0.6)',
+                  transformOrigin: 'top left',
+                }}
+              >
+                <MapNewsCard item={item} />
+              </div>
+            ));
+          })}
+        </div>
+      )}
+
       <svg
         ref={svgRef}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
