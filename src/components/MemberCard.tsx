@@ -1,5 +1,6 @@
 import type { SingleSeatMember, ProportionalMember } from '../types/member';
 import { PARTY_COLORS } from '../lib/parseMembers';
+import { getMemberImageUrl } from '../lib/memberImage';
 
 interface MemberCardProps {
   member: SingleSeatMember | ProportionalMember;
@@ -9,15 +10,28 @@ interface MemberCardProps {
 export function MemberCard({ member, showDistrict = true }: MemberCardProps) {
   const partyColor = PARTY_COLORS[member.party] || '#808080';
   const isSingleSeat = 'district' in member;
+  const imageUrl = member.id ? getMemberImageUrl(member.id) : null;
 
   return (
     <div className="bg-slate-800/60 border border-cyan-500/30 rounded-lg p-3 hover:bg-slate-700/60 transition-colors">
       <div className="flex items-start gap-3">
-        {/* Party color indicator */}
-        <div
-          className="w-2 h-16 rounded-full flex-shrink-0"
-          style={{ backgroundColor: partyColor }}
-        />
+        {/* Member photo or party color indicator */}
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={member.name}
+            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+          />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center"
+            style={{ backgroundColor: partyColor + '40' }}
+          >
+            <span className="text-2xl font-bold" style={{ color: partyColor }}>
+              {member.name.charAt(0)}
+            </span>
+          </div>
+        )}
         
         <div className="flex-1 min-w-0">
           {/* Name & Party */}
