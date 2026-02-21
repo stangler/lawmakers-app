@@ -102,7 +102,7 @@ export function MemberPanel({
           <h2 className="text-cyan-400 font-bold text-lg mb-1">{selectedMember.name}</h2>
           <p className="text-gray-400 text-sm">{selectedMember.party}</p>
           <p className="text-gray-500 text-xs mt-1">
-            {memberNews.length}件の相关新闻
+            {memberNews.length}件の関連ニュース
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export function MemberPanel({
           ) : (
             <div className="text-center py-8 text-gray-400">
               <div className="text-2xl mb-2">📰</div>
-              <div className="text-sm">相关新闻はありません</div>
+              <div className="text-sm">関連するニュースはありません</div>
             </div>
           )}
         </div>
@@ -129,7 +129,7 @@ export function MemberPanel({
       <h2 className="text-cyan-400 font-bold text-lg mb-2">{title}</h2>
       <p className="text-gray-400 text-sm mb-4">
         {totalCount}名の議員
-        {selectedMember && ` • ${memberNews.length}件の相关新闻`}
+        {selectedMember && ` • ${memberNews.length}件の関連ニュース`}
       </p>
       
       <div className="flex-1 overflow-y-auto space-y-4">
