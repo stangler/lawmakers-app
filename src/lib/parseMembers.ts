@@ -49,9 +49,9 @@ export function parseSingleSeatMarkdown(markdown: string): SingleSeatMember[] {
       const nextLine = lines[i + 1].trim();
       // 氏名パターン：全角スペースを含む または 漢字のみ
       if (nextLine && !nextLine.startsWith('###') && !nextLine.startsWith('##') && 
-          (nextLine.includes('　') || /^[\u4E00-\u9FAF]+$/.test(nextLine))) {
+          (nextLine.includes('　') || includes(' ') || /^[\u4E00-\u9FAF]+$/.test(nextLine))) {
         const party = line;
-        const name = nextLine.replace(/　/g, ' ').trim();
+        const name = nextLine.replace(/ /g, ' ').trim();
         const kana = lines[i + 2]?.trim() || '';
         
         // 情報行をパース
@@ -61,7 +61,13 @@ export function parseSingleSeatMarkdown(markdown: string): SingleSeatMember[] {
         // 経歴
         const background = lines[i + 4]?.trim() || '';
         
+        // ID（ある場合）
+        const idLine = lines[i + 5]?.trim() || '';
+        const idMatch = idLine.match(/^ID:\s*(\d+)$/);
+        const id = idMatch ? parseInt(idMatch[1], 10) : 0;
+        
         members.push({
+          id,
           prefecture: currentPrefecture,
           prefectureCode: currentPrefectureCode,
           district: currentDistrict,
@@ -75,7 +81,8 @@ export function parseSingleSeatMarkdown(markdown: string): SingleSeatMember[] {
           background,
         });
         
-        i += 4; // 次の4行をスキップ
+        // IDがあるかどうかでスキップする行数を変更
+        i += id ? 5 : 4;
       }
     }
   }
@@ -150,7 +157,7 @@ export function parseProportionalMarkdown(markdown: string): ProportionalMember[
     const possibleParties = ['自民', '中道', '国民', '維新', '共産', 'れいわ', '参政', 'みらい'];
     if (possibleParties.includes(line) && i + 5 < lines.length) {
       const party = line;
-      const name = lines[i + 1]?.trim().replace(/　/g, ' ') || '';
+      const name = lines[i + 1]?.trim().replace(/ /g, ' ') || '';
       const kana = lines[i + 2]?.trim() || '';
       const statusRaw = lines[i + 3]?.trim() || '';
       const status = statusRaw as '新' | '前' | '元';
@@ -160,13 +167,19 @@ export function parseProportionalMarkdown(markdown: string): ProportionalMember[
       const age = ageMatch ? parseInt(ageMatch[1], 10) : 0;
       
       const termsLine = lines[i + 5]?.trim() || '';
-      const termsMatch = termsLine.match(/当選：(\d+)回目/);
+      const termsMatch = termsLine.match(/当选：(\d+)回目/);
       const terms = termsMatch ? parseInt(termsMatch[1], 10) : 0;
       
       const background = lines[i + 6]?.trim() || '';
       const originLine = lines[i + 7]?.trim() || '';
       
+      // ID（ある場合）
+      const idLine = lines[i + 8]?.trim() || '';
+      const idMatch = idLine.match(/^ID:\s*(\d+)$/);
+      const id = idMatch ? parseInt(idMatch[1], 10) : 0;
+      
       members.push({
+        id,
         block: currentBlock,
         party,
         name,
@@ -178,7 +191,7 @@ export function parseProportionalMarkdown(markdown: string): ProportionalMember[
         originDistrict: originLine === '比例単独' ? undefined : originLine,
       });
       
-      i += 7;
+      i += id ? 8 : 7;
     }
   }
   
