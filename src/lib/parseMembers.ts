@@ -167,7 +167,7 @@ export function parseProportionalMarkdown(markdown: string): ProportionalMember[
       const age = ageMatch ? parseInt(ageMatch[1], 10) : 0;
       
       const termsLine = lines[i + 5]?.trim() || '';
-      const termsMatch = termsLine.match(/当选：(\d+)回目/);
+      const termsMatch = termsLine.match(/当選：(\d+)回目/);
       const terms = termsMatch ? parseInt(termsMatch[1], 10) : 0;
       
       const background = lines[i + 6]?.trim() || '';
