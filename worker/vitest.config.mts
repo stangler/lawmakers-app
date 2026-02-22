@@ -6,6 +6,8 @@ export default defineWorkersConfig({
 			workers: {
 				wrangler: { 
 					configPath: './wrangler.jsonc',
+				},
+				miniflare: {
 					assets: {
 						directory: './public',
 					},
