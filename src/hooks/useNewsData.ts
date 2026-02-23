@@ -23,7 +23,9 @@ interface UseNewsDataResult {
 async function fetchWithRetry(url: string, retries = MAX_RETRIES): Promise<NewsApiResponse> {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        credentials: 'include', // Cookie を送信（認証用）
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: NewsApiResponse = await res.json();
       return data;
