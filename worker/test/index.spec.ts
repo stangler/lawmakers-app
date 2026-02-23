@@ -15,7 +15,7 @@ describe('Lawmakers API worker', () => {
 		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
 		await waitOnExecutionContext(ctx);
 		expect(response.status).toBe(404);
-		expect(await response.text()).toMatchInlineSnapshot(`"{"error":"Not Found"}"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"{"error":"Not Found","code":"NOT_FOUND"}"`)
 	});
 
 	it('responds with health check (unit style)', async () => {
