@@ -1,6 +1,21 @@
 import { test, expect } from '@playwright/test';
 
+// /api/me をモックするヘルパー
+async function mockApiMe(page: Parameters<Parameters<typeof test>[1]>[0]['page']) {
+  await page.route('**/api/me', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: 'test-user', name: 'Test User' }),
+    });
+  });
+}
+
 test.describe('アプリ初期表示', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockApiMe(page);
+  });
+
   test('ページが正常に読み込まれる', async ({ page }) => {
     await page.goto('/');
     
@@ -62,6 +77,7 @@ test.describe('アプリ初期表示', () => {
 
 test.describe('モード切り替え', () => {
   test.beforeEach(async ({ page }) => {
+    await mockApiMe(page);
     await page.goto('/');
     await expect(page.locator('svg[viewBox="0 0 800 800"]')).toBeVisible();
     await page.waitForTimeout(500);
@@ -106,6 +122,7 @@ test.describe('モード切り替え', () => {
 
 test.describe('ローディング状態', () => {
   test('データ読み込み後に地図が表示される', async ({ page }) => {
+    await mockApiMe(page);
     // ネットワーク遅延をシミュレート
     await page.goto('/');
     

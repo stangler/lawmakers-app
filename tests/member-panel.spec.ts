@@ -1,7 +1,19 @@
 import { test, expect } from '@playwright/test';
 
+// /api/me をモックするヘルパー
+async function mockApiMe(page: Parameters<Parameters<typeof test>[1]>[0]['page']) {
+  await page.route('**/api/me', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: 'test-user', name: 'Test User' }),
+    });
+  });
+}
+
 test.describe('議員パネル', () => {
   test.beforeEach(async ({ page }) => {
+    await mockApiMe(page);
     await page.goto('/');
     // 地図が読み込まれるまで待機（viewBox属性で地図SVGを特定）
     await expect(page.locator('svg[viewBox="0 0 800 800"]')).toBeVisible();
@@ -119,6 +131,7 @@ test.describe('議員パネル', () => {
 
 test.describe('比例代表モードの議員パネル', () => {
   test.beforeEach(async ({ page }) => {
+    await mockApiMe(page);
     await page.goto('/');
     // 地図が読み込まれるまで待機（viewBox属性で地図SVGを特定）
     await expect(page.locator('svg[viewBox="0 0 800 800"]')).toBeVisible();
@@ -162,6 +175,7 @@ test.describe('比例代表モードの議員パネル', () => {
 
 test.describe('議員パネルのスクロール', () => {
   test.beforeEach(async ({ page }) => {
+    await mockApiMe(page);
     await page.goto('/');
     // 地図が読み込まれるまで待機（viewBox属性で地図SVGを特定）
     await expect(page.locator('svg[viewBox="0 0 800 800"]')).toBeVisible();

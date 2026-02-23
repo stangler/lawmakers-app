@@ -16,33 +16,26 @@
 	"assets": {
 		"directory": "./dist",
 		"not_found_handling": "single-page-application"
+	},
+	"d1_databases": [
+		{
+			"binding": "lawmakers_db",
+			"database_name": "lawmakers-db",
+			"database_id": "279348c3-544e-442c-a533-c2b2870de4c7"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "f30fc51140514bd6b77c3078723ff59a"
+		}
+	],
+	// Environment Variables
+	"vars": {
+		"APP_ORIGIN": "https://lawmakers-app.stangler.workers.dev"
 	}
-	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": {  "mode": "smart" }
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-	// "vars": {  "MY_VARIABLE": "production_value" }
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": {  "directory": "./public/",  "binding": "ASSETS" }
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	// Secrets (wrangler secret put で設定):
+	// - JWT_SECRET      : アクセストークン署名用（32バイト以上推奨）
+	// - REFRESH_SECRET  : Refresh トークン署名用（32バイト以上推奨）
+	// - RESEND_API_KEY  : Resend API Key（メール送信用）
 }
