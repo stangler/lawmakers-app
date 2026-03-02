@@ -126,14 +126,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }): React
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setUser(data.user);
-        return { success: true };
+      if (!response.ok) {
+        // レスポンスがOKでない場合、テキストとして読み込んでエラーメッセージを取得
+        const errorText = await response.text();
+        console.error('Login failed with status:', response.status, 'Response:', errorText);
+        return { success: false, error: `ログインに失敗しました (${response.status}): ${errorText.substring(0, 100)}` };
       }
 
-      return { success: false, error: data.error || 'ログインに失敗しました' };
+      try {
+        // レスポンスがOKの場合のみJSONをパース
+        const data = await response.json();
+        setUser(data.user);
+        return { success: true };
+      } catch (jsonError) {
+        // JSONパースエラー時の処理
+        console.error('Login error: Server returned invalid JSON.', jsonError);
+        return { success: false, error: 'サーバーからの応答が不正です' };
+      }
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: 'ネットワークエラーが発生しました' };
