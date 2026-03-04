@@ -27,7 +27,7 @@ export function getMemberImageUrl(id: number): string | null {
     4: '4_nakamura-hiroyuki.jpg',
     5: '5_wada-yoshiaki.jpg',
     6: '6_azuma-kuniyoshi.jpg',
-    7: '7_suzuki_takako.jpg',
+    7: '7_suzuki-takako.jpg',
     8: '8_mukouyama-jyun.jpg',
     9: '9_matsushita-hideki.jpg',
     10: '10_kamiya-hiroshi.jpg',
