@@ -85,3 +85,6 @@ node_modules/
 
 # devcontainer
 .devcontainer
+
+# Cline
+/.clinerules
