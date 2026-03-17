@@ -90,5 +90,5 @@ node_modules/
 /.clinerules
 
 # serena
-.serena
-serena
+/.serena
+/serena

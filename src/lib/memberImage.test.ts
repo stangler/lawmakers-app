@@ -36,7 +36,7 @@ describe('memberImage', () => {
 
 			it('ID: 7 の場合、正しい画像パスを返す', () => {
 				const result = getMemberImageUrl(7)
-				expect(result).toBe('/data/7_suzuki_takako.jpg')
+				expect(result).toBe('/data/7_suzuki-takako.jpg')
 			})
 
 			it('ID: 8 の場合、正しい画像パスを返す', () => {
